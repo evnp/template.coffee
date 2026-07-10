@@ -6,7 +6,7 @@ start: # run template_coffee Phoenix site
 
 clone: # clone this project with a new name (usage: run clone my_new_app MyNewApp)
 	mkdir ../$(1)
-	cp ./{README.md,runfile,mix.exs,mix.lock,.formatter.exs} ../$(1)
+	cp ./{README.md,runfile,mix.exs,mix.lock,.formatter.exs,.gitignore} ../$(1)
 	cp -r ./{assets,config,lib,priv,test,.elixir_ls} ../$(1)
 	mv "../$(1)/lib/template_coffee.ex" "../$(1)/lib/$(1).ex"
 	mv "../$(1)/lib/template_coffee_web.ex" "../$(1)/lib/$(1)_web.ex"

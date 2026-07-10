@@ -97,6 +97,9 @@ defmodule TemplateCoffeeWeb do
       # ~u "unique words" sigil for HTML element classes
       import UniqueWordsSigil
 
+      # Configure Temple (templating DSL):
+      # See https://github.com/mhanberg/temple/issues/201
+      # and resulting https://github.com/georgevanderson/temple_liveview/pull/1
       import Temple
       import Phoenix.LiveView.TagEngine, only: [component: 3, inner_block: 2]
     end
