@@ -1,0 +1,24 @@
+start: # run template_coffee Phoenix site
+	tmex template_coffee --kill --quiet
+	tmex template_coffee --detached 'mix phx.server'
+	sleep 2
+	open 'http://localhost:4000'
+
+clone: # clone this project with a new name (usage: run clone my_new_app MyNewApp)
+	mkdir ../$(1)
+	cp ./{README.md,runfile,mix.exs,mix.lock,.formatter.exs} ../$(1)
+	cp -r ./{assets,config,lib,priv,test,.elixir_ls} ../$(1)
+	mv "../$(1)/lib/template_coffee.ex" "../$(1)/lib/$(1).ex"
+	mv "../$(1)/lib/template_coffee_web.ex" "../$(1)/lib/$(1)_web.ex"
+	mv "../$(1)/lib/template_coffee/" "../$(1)/lib/$(1)/"
+	mv "../$(1)/lib/template_coffee_web/" "../$(1)/lib/$(1)_web/"
+	mv "../$(1)/test/template_coffee_web/" "../$(1)/test/$(1)_web/"
+	cd ../$(1) && LC_ALL=C LANG=C fd --type=file --exec sed -E -i "" "s/template_coffee/$(1)/g"
+	cd ../$(1) && LC_ALL=C LANG=C fd --type=file --exec sed -E -i "" "s/TemplateCoffee/$(2)/g"
+	echo "Now run:"
+	echo "$$( tput bold )cd ../$(1) && mix deps.get && mix ecto.create$$( tput sgr0 )"
+	echo "When you're ready to start the server, run:"
+	echo "$$( tput bold )mix phx.server$$( tput sgr0 )"
+	echo "or"
+	echo "$$( tput bold )run start$$( tput sgr0 )"
+
