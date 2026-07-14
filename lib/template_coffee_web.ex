@@ -90,6 +90,10 @@ defmodule TemplateCoffeeWeb do
       # Common modules used in templates
       alias Phoenix.LiveView.JS
       alias TemplateCoffeeWeb.Layouts
+      alias Phoenix.LiveView.ColocatedJS
+      alias Phoenix.LiveView.ColocatedHook
+      alias TemplateCoffeeWeb.ColocatedScopedCSS
+      import TemplateCoffeeWeb.Util
 
       # Routes generation with the ~p sigil
       unquote(verified_routes())
