@@ -35,8 +35,8 @@ if config_env() == :dev do
         ~r"priv/gettext/.*\.po$"E,
         # Router, Controllers, LiveViews and LiveComponents
         ~r"lib/template_coffee_web/router\.ex$"E,
-        ~r"lib/template_coffee_web/(controllers|live|components)/.*\.(ex|heex)$"E,
-      ],
+        ~r"lib/template_coffee_web/(controllers|live|components)/.*\.(ex|heex)$"E
+      ]
     ]
 end
 
@@ -81,7 +81,7 @@ if config_env() == :prod do
       # Set it to  {0, 0, 0, 0, 0, 0, 0, 1} for local network only access.
       # See the documentation on https://bandit.hexdocs.pm/Bandit.html#t:options/0
       # for details about using IPv6 vs IPv4 and loopback vs public addresses.
-      ip: {0, 0, 0, 0, 0, 0, 0, 0},
+      ip: {0, 0, 0, 0, 0, 0, 0, 0}
     ],
     secret_key_base: secret_key_base
 

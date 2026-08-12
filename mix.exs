@@ -11,7 +11,7 @@ defmodule TemplateCoffee.MixProject do
       aliases: aliases(),
       deps: deps(),
       compilers: [:temple, :es6_maps, :phoenix_live_view] ++ Mix.compilers(),
-      listeners: [Phoenix.CodeReloader],
+      listeners: [Phoenix.CodeReloader]
     ]
   end
 
@@ -21,13 +21,13 @@ defmodule TemplateCoffee.MixProject do
   def application do
     [
       mod: {TemplateCoffee.Application, []},
-      extra_applications: [:logger, :runtime_tools],
+      extra_applications: [:logger, :runtime_tools]
     ]
   end
 
   def cli do
     [
-      preferred_envs: [precommit: :test],
+      preferred_envs: [precommit: :test]
     ]
   end
 
@@ -78,7 +78,7 @@ defmodule TemplateCoffee.MixProject do
       {:temple, "~> 0.14.1"},
       {:unique_words_sigil, "~> 0.1.0"},
       {:es6_maps, "~> 1.0.2", only: :dev},
-      {:regex_formatter, "~> 0.1.3", only: :dev},
+      {:regex_formatter, "~> 0.1.3", only: :dev}
     ]
   end
 
@@ -99,9 +99,9 @@ defmodule TemplateCoffee.MixProject do
       "assets.deploy": [
         "tailwind template_coffee --minify",
         "esbuild template_coffee --minify",
-        "phx.digest",
+        "phx.digest"
       ],
-      precommit: ["compile --warnings-as-errors", "deps.unlock --unused", "format", "test"],
+      precommit: ["compile --warnings-as-errors", "deps.unlock --unused", "format", "test"]
     ]
   end
 end

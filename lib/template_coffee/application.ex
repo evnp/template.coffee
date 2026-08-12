@@ -15,7 +15,7 @@ defmodule TemplateCoffee.Application do
       # Start a worker by calling: TemplateCoffee.Worker.start_link(arg)
       # {TemplateCoffee.Worker, arg},
       # Start to serve requests, typically the last entry
-      TemplateCoffeeWeb.Endpoint,
+      TemplateCoffeeWeb.Endpoint
     ]
 
     # See https://elixir.hexdocs.pm/Supervisor.html

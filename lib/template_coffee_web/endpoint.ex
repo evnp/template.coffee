@@ -8,7 +8,7 @@ defmodule TemplateCoffeeWeb.Endpoint do
     store: :cookie,
     key: "_template_coffee_key",
     signing_salt: "gC5api6E",
-    same_site: "Lax",
+    same_site: "Lax"
   ]
 
   socket "/live", Phoenix.LiveView.Socket,

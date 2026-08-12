@@ -26,7 +26,7 @@ config :template_coffee, TemplateCoffeeWeb.Endpoint,
   secret_key_base: "T8+hmFnDcldQ42ZAEK8kfXw0t00x/mklbwkkxo/ZDSxuQ7NsmDw0vkiuBKU4Av/T",
   watchers: [
     esbuild: {Esbuild, :install_and_run, [:template_coffee, ~w(--sourcemap=inline --watch)]},
-    tailwind: {Tailwind, :install_and_run, [:template_coffee, ~w(--watch)]},
+    tailwind: {Tailwind, :install_and_run, [:template_coffee, ~w(--watch)]}
   ]
 
 # ## SSL Support
