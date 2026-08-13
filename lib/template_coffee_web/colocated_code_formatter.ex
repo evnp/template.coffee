@@ -13,8 +13,8 @@ defmodule ColocatedCodeFormatter do
   def render_tag({tag, attrs, content}, _opts) when tag in ["script", "style"] do
     extension =
       case tag do
-        "script" -> ".js"
-        "style" -> ".css"
+        "script" -> "js"
+        "style" -> "css"
       end
 
     suffix =
@@ -31,6 +31,8 @@ defmodule ColocatedCodeFormatter do
         "prettier_#{System.unique_integer([:positive])}_#{suffix}"
       )
 
+    prettier_executable = Path.expand("assets/node_modules/.bin/prettier")
+
     try do
       File.write!(tmp_file, content)
 
@@ -40,7 +42,7 @@ defmodule ColocatedCodeFormatter do
       #      : becomes invalid. Instead, simpler setup below will:
       #      : - show error output clearly when `mix format` is run manually
       #      : - won't do anything (fail gracefully) when formatting runs in-editor
-      case System.cmd("npx", ["prettier", tmp_file]) do
+      case System.cmd(prettier_executable, [tmp_file]) do
         {output, 0} -> {:ok, String.trim(output)}
         _ -> :skip
       end
