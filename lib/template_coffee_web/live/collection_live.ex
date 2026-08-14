@@ -11,7 +11,8 @@ defmodule TemplateCoffeeWeb.CollectionLive do
         """
 
         div class:
-              ~u"#{ColocatedScopedCSS.scope(__ENV__, ~H"""
+              ~u"bg-sky-200
+              #{ColocatedScopedCSS.scope(__ENV__, ~H"""
               <style :type={ColocatedScopedCSS}>
                 width: 100vw;
                 height: 100vh;
@@ -21,13 +22,23 @@ defmodule TemplateCoffeeWeb.CollectionLive do
 
                 .blue {
                   color: blue;
+                  width: stretch;
+                  margin: 32vw;
+
+                  &::placeholder {
+                    color: green;
+                  }
                 }
               </style>
               """)}",
             "phx-hook": temple_phx_hook(__MODULE__, "testHook"),
             id: "hooks-need-ids"
         do
-          p class: "blue", do: "Welcome to the blue collection."
+          input class: "blue",
+                value: "Welcome to the blue collection.",
+                placeholder: "The collection appears to be empty."
+
+          i class: "hero-arrow-right-circle"
 
           ~H"""
           <script :type={ColocatedHook} name=".testHook">

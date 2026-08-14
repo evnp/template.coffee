@@ -1,12 +1,3 @@
-# TODO: Implement scoped instead of global CSS eg.
-# phoenix-live-view.hexdocs.pm/Phoenix.LiveView.ColocatedCSS.html#module-scoped-css
-# Note: Implementation at link above relies on CSS @scope at-rule browser support
-#       which is currently low at 88% (https://caniuse.com/css-cascade-scope).
-#       Ideally, polyfill this or create an alternate implementation using PostCSS.
-#       Per docs link above,
-#       "Another way to implement scoped CSS could be to use PostCSS and apply an
-#        attribute to all tags in a template."
-
 defmodule TemplateCoffeeWeb.ColocatedGlobalCSS do
   use Phoenix.LiveView.ColocatedCSS
 

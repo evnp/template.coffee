@@ -26,7 +26,17 @@ config :template_coffee, TemplateCoffeeWeb.Endpoint,
   secret_key_base: "T8+hmFnDcldQ42ZAEK8kfXw0t00x/mklbwkkxo/ZDSxuQ7NsmDw0vkiuBKU4Av/T",
   watchers: [
     esbuild: {Esbuild, :install_and_run, [:template_coffee, ~w(--sourcemap=inline --watch)]},
-    tailwind: {Tailwind, :install_and_run, [:template_coffee, ~w(--watch)]}
+    node: [
+      "node_modules/.bin/postcss",
+      "--watch",
+      "--config",
+      "postcss.config.js",
+      "css/app.css",
+      "--output",
+      "../priv/static/assets/css/app.css",
+      env: %{"NODE_PATH" => Mix.Project.build_path()},
+      cd: Path.expand("../assets", __DIR__)
+    ],
   ]
 
 # ## SSL Support
