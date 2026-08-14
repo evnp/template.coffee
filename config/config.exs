@@ -17,7 +17,7 @@ config :template_coffee, TemplateCoffeeWeb.Endpoint,
   adapter: Bandit.PhoenixAdapter,
   render_errors: [
     formats: [html: TemplateCoffeeWeb.ErrorHTML, json: TemplateCoffeeWeb.ErrorJSON],
-    layout: false
+    layout: false,
   ],
   pubsub_server: TemplateCoffee.PubSub,
   live_view: [signing_salt: "/NQZ8c2x"]

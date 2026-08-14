@@ -36,7 +36,7 @@ if config_env() == :dev do
         # Router, Controllers, LiveViews and LiveComponents
         ~r"lib/template_coffee_web/router\.ex$"E,
         ~r"lib/template_coffee_web/(controllers|live|components)/.*\.(ex|heex)$"E
-      ]
+      ],
     ]
 end
 
