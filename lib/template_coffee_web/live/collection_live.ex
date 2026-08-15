@@ -29,6 +29,10 @@ defmodule TemplateCoffeeWeb.CollectionLive do
                     color: green;
                   }
                 }
+
+                .red {
+                  color: red;
+                }
               </style>
               """)}",
             "phx-hook": temple_phx_hook(__MODULE__, "testHook"),
@@ -39,6 +43,18 @@ defmodule TemplateCoffeeWeb.CollectionLive do
                 placeholder: "The collection appears to be empty."
 
           i class: "hero-arrow-right-circle"
+
+          div do
+            p class: "red", do: "this should be red, per CSS scoping"
+          end
+
+          div "data-descope": ColocatedScopedCSS.descope(__ENV__) do
+            p class: "red", do: "this should not be red, per data-descope"
+          end
+
+          div class: ColocatedScopedCSS.descope(__ENV__) do
+            p class: "red", do: "this should not be red, per class-based descope"
+          end
 
           ~H"""
           <script :type={ColocatedHook} name=".testHook">
