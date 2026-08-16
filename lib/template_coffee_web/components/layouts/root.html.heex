@@ -46,6 +46,13 @@
     </script>
   </head>
   <body>
+    <script>
+      // Detect whether @scope is supported in CSS, and add class to body which can be
+      // used to add fallback styles in CSS for legacy browsers that don't suport it:
+      if (window.CSSScopeRule === undefined) {
+        document.body.classList.add("no-css-scope-at-rule-support");
+      }
+    </script>
     {@inner_content}
   </body>
 </html>

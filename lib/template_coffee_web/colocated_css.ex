@@ -12,7 +12,10 @@ end
 defmodule TemplateCoffeeWeb.ColocatedScopedCSS do
   use Phoenix.LiveView.ColocatedCSS
 
-  @legacy_browser_compat true
+  @compat :hybrid
+  # :modern - use @scope in CSS for scoping
+  # :legacy - use basic CSS selectors for scoping that should work in all browsers
+  # :hybrid - use @scope in CSS for scoping plus fallback styles for legacy browsers
 
   def scope(env, _style_heex \\ "") do
     "scope-css #{scope_str(env)}"
@@ -87,22 +90,39 @@ defmodule TemplateCoffeeWeb.ColocatedScopedCSS do
          |> Enum.join(", ")) <> ")"
 
     css =
-      if @legacy_browser_compat do
-        transform_css_legacy_compat(css, upper_bound_selector, lower_bound_selector)
-      else
-        transform_css_modern(css, upper_bound_selector, lower_bound_selector)
+      case @compat do
+        :modern ->
+          scope_css_modern(css, upper_bound_selector, lower_bound_selector)
+
+        :legacy ->
+          scope_css_legacy_compat(css, upper_bound_selector, lower_bound_selector)
+
+        :hybrid ->
+          scope_css_hybrid_compat(css, upper_bound_selector, lower_bound_selector)
+
+        _ ->
+          raise(RuntimeError, "@compat must be :modern, :legacy, or :hybrid")
       end
 
     {:ok, css, []}
     # We don't need to return a :tag_attribute here as you normally would, because
-    # when using CSS-scoping with Temple we'll apply the scoping attr/class separately.
+    # when using CSS-scoping w/ Temple we'll apply the scoping attr/class separately.
   end
 
-  defp transform_css_modern(css, upper_bound_selector, lower_bound_selector) do
+  defp scope_css_modern(css, upper_bound_selector, lower_bound_selector) do
     "@scope (#{upper_bound_selector}) to (#{lower_bound_selector}) { #{css} }"
   end
 
-  defp transform_css_legacy_compat(css, upper_bound_selector, lower_bound_selector) do
+  defp scope_css_hybrid_compat(css, upper_bound_selector, lower_bound_selector) do
+    """
+    #{scope_css_modern(css, upper_bound_selector, lower_bound_selector)}
+    .no-css-scope-at-rule-support {
+      #{scope_css_legacy_compat(css, upper_bound_selector, lower_bound_selector)}
+    }
+    """
+  end
+
+  defp scope_css_legacy_compat(css, upper_bound_selector, lower_bound_selector) do
     # For top-level child element selectors in CSS, add :not(...) rules for descoping:
     css =
       css
