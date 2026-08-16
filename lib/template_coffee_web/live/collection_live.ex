@@ -22,8 +22,7 @@ defmodule TemplateCoffeeWeb.CollectionLive do
 
                 .blue {
                   color: blue;
-                  width: stretch;
-                  margin: 32vw;
+                  width: 20vw;
 
                   &::placeholder {
                     color: green;
@@ -38,22 +37,34 @@ defmodule TemplateCoffeeWeb.CollectionLive do
             "phx-hook": temple_phx_hook(__MODULE__, "testHook"),
             id: "hooks-need-ids"
         do
-          input class: "blue",
-                value: "Welcome to the blue collection.",
-                placeholder: "The collection appears to be empty."
-
-          i class: "hero-arrow-right-circle"
-
           div do
-            p class: "red", do: "this should be red, per CSS scoping"
-          end
+            div class: "flex" do
+              input class: "blue",
+                    value: "Welcome to the blue collection.",
+                    placeholder: "The collection appears to be empty."
 
-          div "data-descope": ColocatedScopedCSS.descope(__ENV__) do
-            p class: "red", do: "this should not be red, per data-descope"
-          end
+              i class: "hero-arrow-right-circle"
+            end
 
-          div class: ColocatedScopedCSS.descope(__ENV__) do
-            p class: "red", do: "this should not be red, per class-based descope"
+            div do
+              div do
+                p class: "red", do: "this should be red, per CSS scoping"
+              end
+
+              div "data-descope": ColocatedScopedCSS.descope(__ENV__) do
+                p class: "red", do: "this should not be red, per data-descope"
+              end
+
+              div class: ColocatedScopedCSS.descope(__ENV__) do
+                p class: "red", do: "this should not be red, per class-based descope"
+              end
+
+              c &sub_component/1 do
+                p class: "red" do
+                  "this should not be red, due to separate sub-component CSS scope"
+                end
+              end
+            end
           end
 
           ~H"""
@@ -66,6 +77,25 @@ defmodule TemplateCoffeeWeb.CollectionLive do
           </script>
           """
         end
+      end
+    end
+  end
+
+  def sub_component(assigns) do
+    temple do
+      div class:
+            ~u"#{ColocatedScopedCSS.scope(__ENV__, ~H"""
+            <style :type={ColocatedScopedCSS}>
+              background: rgba(50, 50, 50, 0.1);
+            </style>
+            """)}" do
+        p do: "Hello, I'm a sub-component!"
+
+        div class: "ml-8" do
+          slot @inner_block
+        end
+
+        p do: "Goodbye, from sub-component."
       end
     end
   end
