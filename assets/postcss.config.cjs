@@ -8,8 +8,8 @@ const path = require("path")
 module.exports = {
   plugins: [
     require("postcss-import")({ path: process.env.NODE_PATH.split(path.delimiter) }),
+    require("@tailwindcss/postcss"),
     require("postcss-nesting"),
     require("autoprefixer"),
-    require("@tailwindcss/postcss"),
   ],
 }
