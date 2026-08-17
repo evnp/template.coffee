@@ -12,6 +12,10 @@ end
 defmodule TemplateCoffeeWeb.ColocatedScopedCSS do
   use Phoenix.LiveView.ColocatedCSS
 
+  @select :class
+  # :class - use CSS classes for scoping
+  # :attr  - use CSS attributes for scoping
+  # :both  - allow use of CSS classes and attributes in tandem for scoping
   @compat :hybrid
   # :modern - use @scope in CSS for scoping
   # :legacy - use basic CSS selectors for scoping that should work in all browsers
@@ -56,6 +60,16 @@ defmodule TemplateCoffeeWeb.ColocatedScopedCSS do
     #       to still connect to generated scope CSS even though line is different.
   end
 
+  defp scope_class(scope_str), do: ~s|.#{scope_str}|
+  defp scope_attr(scope_str), do: ~s|[data-scope="scope-css #{scope_str}"]|
+  defp descope_class(descope_str), do: ~s|.#{descope_str}|
+  defp descope_attr(descope_str), do: ~s|[data-descope="descope-css #{descope_str}"]|
+  defp descope_class_auto(scope_str), do: ~s|.scope-css:not(.#{scope_str})|
+
+  defp descope_attr_auto(scope_str) do
+    ~s|[data-scope]:not([data-scope="scope-css #{scope_str}"])|
+  end
+
   @impl true
   def transform("style", _attrs, css, meta) do
     scope_str = scope_str(meta)
@@ -64,30 +78,30 @@ defmodule TemplateCoffeeWeb.ColocatedScopedCSS do
     # Specify attr-based and class-based selectors in upper_bound_selector:
     # (either can be used, depending on what's most convenient in the template)
     upper_bound_selector =
-      ":is(" <>
-        ([
-           ~s|[data-scope="scope-css #{scope_str}"]|,
-           ~s|.#{scope_str}|,
-         ]
-         |> Enum.join(", ")) <> ")"
+      case @select do
+        :class -> scope_class(scope_str)
+        :attr -> scope_attr(scope_str)
+        :both -> ":is(#{scope_class(scope_str)}, #{scope_attr(scope_str)})"
+        _ -> raise(RuntimeError, "@select must be :class, :attr, or :both")
+      end
 
     # First two lines in lower_bound_selector mirror upper_bound_selector;
     # they select a descope attr or descope CSS class respectively.
     lower_bound_selector =
-      ":is(" <>
-        ([
-           # Specify attr-based and class-based selectors in lower_bound_selector:
-           # (either can be used, depending on what's most convenient in the template)
-           ~s|[data-descope="descope-css #{descope_str}"]|,
-           ~s|.#{descope_str}|,
-           # Remaining two lines are here to provide *automatic descoping*, when a
-           # sub-component opens a new CSS scope within a parent's CSS scope. Styles
-           # scoped to the parent should not be applied within the sub-component, so
-           # these two selectors match elements WITH scope that is NOT the parent's:
-           ~s|[data-scope]:not([data-scope="scope-css #{scope_str}"])|,
-           ~s|.scope-css:not(.#{scope_str})|,
-         ]
-         |> Enum.join(", ")) <> ")"
+      case @select do
+        :class ->
+          ":is(#{descope_class(descope_str)}, #{descope_class_auto(scope_str)})"
+
+        :attr ->
+          ":is(#{descope_attr(descope_str)}, #{descope_attr_auto(scope_str)})"
+
+        :both ->
+          ":is(#{descope_class(descope_str)}, #{descope_class_auto(scope_str)}," <>
+            " #{descope_attr(descope_str)}, #{descope_attr_auto(scope_str)})"
+
+        _ ->
+          raise(RuntimeError, "@select must be :class, :attr, or :both")
+      end
 
     css =
       case @compat do
