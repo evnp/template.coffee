@@ -39,12 +39,7 @@ defmodule TemplateCoffeeWeb.ColocatedScopedCSS do
   end
 
   def descope(env) do
-    "descope-css #{descope_str(env)}"
-    # Note: Extra descope-css prefix is added when scoping for two reasons -
-    #       - It adds clarity in resulting HTML when a CSS descope occurs.
-    #       - It keeps code and HTML consistent between scoping and descoping.
-    #       We don't currently need to select directly on descope-css, like we do
-    #       on scope-css (for automatic sub-component descoping).
+    descope_str(env)
   end
 
   defp scope_str(env) do
@@ -63,7 +58,7 @@ defmodule TemplateCoffeeWeb.ColocatedScopedCSS do
   defp scope_class(scope_str), do: ~s|.#{scope_str}|
   defp scope_attr(scope_str), do: ~s|[data-scope="scope-css #{scope_str}"]|
   defp descope_class(descope_str), do: ~s|.#{descope_str}|
-  defp descope_attr(descope_str), do: ~s|[data-descope="descope-css #{descope_str}"]|
+  defp descope_attr(descope_str), do: ~s|[data-descope="#{descope_str}"]|
   defp descope_class_auto(scope_str), do: ~s|.scope-css:not(.#{scope_str})|
 
   defp descope_attr_auto(scope_str) do
