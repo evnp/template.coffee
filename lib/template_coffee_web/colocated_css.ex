@@ -70,9 +70,9 @@ defmodule TemplateCoffeeWeb.ColocatedScopedCSS do
     scope_str = scope_str(meta)
     descope_str = descope_str(meta)
 
-    # Specify attr-based and class-based selectors in upper_bound_selector:
+    # Specify attr-based and class-based selectors in scope_selector:
     # (either can be used, depending on what's most convenient in the template)
-    upper_bound_selector =
+    scope_selector =
       case @select do
         :class -> scope_class(scope_str)
         :attr -> scope_attr(scope_str)
@@ -80,9 +80,9 @@ defmodule TemplateCoffeeWeb.ColocatedScopedCSS do
         _ -> raise(RuntimeError, "@select must be :class, :attr, or :both")
       end
 
-    # First two lines in lower_bound_selector mirror upper_bound_selector;
+    # First two lines in descope_selector mirror scope_selector;
     # they select a descope attr or descope CSS class respectively.
-    lower_bound_selector =
+    descope_selector =
       case @select do
         :class ->
           ":is(#{descope_class(descope_str)}, #{descope_class_auto(scope_str)})"
@@ -101,13 +101,13 @@ defmodule TemplateCoffeeWeb.ColocatedScopedCSS do
     css =
       case @compat do
         :modern ->
-          scope_css_modern(css, upper_bound_selector, lower_bound_selector)
+          scope_css_modern(css, scope_selector, descope_selector)
 
         :legacy ->
-          scope_css_legacy_compat(css, upper_bound_selector, lower_bound_selector)
+          scope_css_legacy_compat(css, scope_selector, descope_selector)
 
         :hybrid ->
-          scope_css_hybrid_compat(css, upper_bound_selector, lower_bound_selector)
+          scope_css_hybrid_compat(css, scope_selector, descope_selector)
 
         _ ->
           raise(RuntimeError, "@compat must be :modern, :legacy, or :hybrid")
@@ -125,7 +125,7 @@ defmodule TemplateCoffeeWeb.ColocatedScopedCSS do
   # when re-opening a scope inside a slot child component within the parent; without
   # the selector transform, this would require an extra wrapper element in the slot.
 
-  defp scope_css_modern(css, upper_bound_selector, lower_bound_selector) do
+  defp scope_css_modern(css, scope_selector, descope_selector) do
     css =
       css
       |> String.replace(
@@ -133,31 +133,31 @@ defmodule TemplateCoffeeWeb.ColocatedScopedCSS do
         "\\1#{@rescope_selector_transform_pattern} {"
       )
 
-    "@scope (#{upper_bound_selector}) to (#{lower_bound_selector}) { #{css} }"
+    "@scope (#{scope_selector}) to (#{descope_selector}) { #{css} }"
   end
 
-  defp scope_css_hybrid_compat(css, upper_bound_selector, lower_bound_selector) do
+  defp scope_css_hybrid_compat(css, scope_selector, descope_selector) do
     """
-    #{scope_css_modern(css, upper_bound_selector, lower_bound_selector)}
+    #{scope_css_modern(css, scope_selector, descope_selector)}
     .no-css-scope-at-rule-support {
-      #{scope_css_legacy_compat(css, upper_bound_selector, lower_bound_selector)}
+      #{scope_css_legacy_compat(css, scope_selector, descope_selector)}
     }
     """
   end
 
-  defp scope_css_legacy_compat(css, upper_bound_selector, lower_bound_selector) do
+  defp scope_css_legacy_compat(css, scope_selector, descope_selector) do
     # For top-level child element selectors in CSS, add :not(...) rules for descoping:
     css =
       css
       |> String.replace(
         @unnested_non_atrule_selector_regex,
         "\\1:is(#{@rescope_selector_transform_pattern})" <>
-          ":not(#{lower_bound_selector}:is(#{@rescope_selector_transform_pattern}))" <>
-          ":not(#{lower_bound_selector} :is(#{@rescope_selector_transform_pattern})) {"
+          ":not(#{descope_selector}:is(#{@rescope_selector_transform_pattern}))" <>
+          ":not(#{descope_selector} :is(#{@rescope_selector_transform_pattern})) {"
       )
 
     # Wrap all CSS within main scoping selector:
-    "#{upper_bound_selector} { #{css} }"
+    "#{scope_selector} { #{css} }"
   end
 
   # TODO comment explain this function
