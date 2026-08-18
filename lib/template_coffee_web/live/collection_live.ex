@@ -2,6 +2,24 @@ defmodule TemplateCoffeeWeb.CollectionLive do
   use TemplateCoffeeWeb, :live_view
 
   def render(assigns) do
+    css_scope =
+      ColocatedScopedCSS.scope(__ENV__, ~H"""
+      <style :type={ColocatedScopedCSS}>
+        .blue {
+          color: blue;
+          width: 20vw;
+
+          &::placeholder {
+            color: green;
+          }
+        }
+
+        .red {
+          color: red;
+        }
+      </style>
+      """)
+
     temple do
       c &Layouts.app/1, flash: @flash do
         ~H"""
@@ -11,27 +29,13 @@ defmodule TemplateCoffeeWeb.CollectionLive do
         """
 
         div class:
-              ~u"bg-sky-200
-              #{ColocatedScopedCSS.scope(__ENV__, ~H"""
+              ~u"bg-sky-200 #{css_scope} #{ColocatedScopedCSS.scope(__ENV__, ~H"""
               <style :type={ColocatedScopedCSS}>
                 width: 100vw;
                 height: 100vh;
                 display: flex;
                 justify-content: center;
                 align-items: center;
-
-                .blue {
-                  color: blue;
-                  width: 20vw;
-
-                  &::placeholder {
-                    color: green;
-                  }
-                }
-
-                .red {
-                  color: red;
-                }
               </style>
               """)}",
             "phx-hook": temple_phx_hook(__MODULE__, "testHook"),
@@ -52,16 +56,18 @@ defmodule TemplateCoffeeWeb.CollectionLive do
               end
 
               div "data-descope": ColocatedScopedCSS.descope(__ENV__) do
-                p class: "red", do: "this should not be red, per data-descope"
+                p class: "red", do: "this should not be red, if using attr CSS scoping"
               end
 
               div class: ColocatedScopedCSS.descope(__ENV__) do
-                p class: "red", do: "this should not be red, per class-based descope"
+                p class: "red", do: "this should not be red, if using class CSS scoping"
               end
 
               c &sub_component/1 do
-                p class: "red" do
-                  "this should not be red, due to separate sub-component CSS scope"
+                div class: css_scope do
+                  p class: "red" do
+                    "slot content defined in the parent's template should be red though"
+                  end
                 end
               end
             end
@@ -92,7 +98,13 @@ defmodule TemplateCoffeeWeb.CollectionLive do
         p do: "Hello, I'm a sub-component!"
 
         div class: "ml-8" do
-          slot @inner_block
+          p class: "red" do
+            "this should not be red, due to separate sub-component CSS scope"
+          end
+
+          div class: ColocatedScopedCSS.descope(__ENV__) do
+            slot @inner_block
+          end
         end
 
         p do: "Goodbye, from sub-component."
