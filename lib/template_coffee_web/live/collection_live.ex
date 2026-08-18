@@ -2,23 +2,8 @@ defmodule TemplateCoffeeWeb.CollectionLive do
   use TemplateCoffeeWeb, :live_view
 
   def render(assigns) do
-    css_scope =
-      ColocatedScopedCSS.scope(__ENV__, ~H"""
-      <style :type={ColocatedScopedCSS}>
-        .blue {
-          color: blue;
-          width: 20vw;
-
-          &::placeholder {
-            color: green;
-          }
-        }
-
-        .red {
-          color: red;
-        }
-      </style>
-      """)
+    container_css_scope = container_css(assigns)
+    css_scope = css(assigns)
 
     temple do
       c &Layouts.app/1, flash: @flash do
@@ -28,16 +13,7 @@ defmodule TemplateCoffeeWeb.CollectionLive do
         </script>
         """
 
-        div class:
-              ~u"bg-sky-200 #{css_scope} #{ColocatedScopedCSS.scope(__ENV__, ~H"""
-              <style :type={ColocatedScopedCSS}>
-                width: 100vw;
-                height: 100vh;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-              </style>
-              """)}",
+        div class: ~u"bg-sky-200 #{css_scope} #{container_css_scope}",
             "phx-hook": temple_phx_hook(__MODULE__, "testHook"),
             id: "hooks-need-ids"
         do
@@ -64,10 +40,8 @@ defmodule TemplateCoffeeWeb.CollectionLive do
               end
 
               c &sub_component/1 do
-                div class: css_scope do
-                  p class: "red" do
-                    "slot content defined in the parent's template should be red though"
-                  end
+                p class: "red #{css_scope}" do
+                  "slot content defined in the parent's template should be red though"
                 end
               end
             end
@@ -85,6 +59,37 @@ defmodule TemplateCoffeeWeb.CollectionLive do
         end
       end
     end
+  end
+
+  defp container_css(assigns) do
+    ColocatedScopedCSS.scope(__ENV__, ~H"""
+    <style :type={ColocatedScopedCSS}>
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    </style>
+    """)
+  end
+
+  defp css(assigns) do
+    ColocatedScopedCSS.scope(__ENV__, ~H"""
+    <style :type={ColocatedScopedCSS}>
+      .blue {
+        color: blue;
+        width: 20vw;
+
+        &::placeholder {
+          color: green;
+        }
+      }
+
+      .red {
+        color: red;
+      }
+    </style>
+    """)
   end
 
   def sub_component(assigns) do
