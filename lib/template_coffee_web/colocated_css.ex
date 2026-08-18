@@ -137,7 +137,7 @@ defmodule TemplateCoffeeWeb.ColocatedScopedCSS do
       css
       |> String.replace(
         ~r/^  ([^ ]|[^ ].*[^ ]) * {/m,
-        "  \\1:not(#{lower_bound_selector}\\1):not(#{lower_bound_selector} \\1) {"
+        "  :is(\\1):not(#{lower_bound_selector}:is(\\1)):not(#{lower_bound_selector} :is(\\1)) {"
       )
 
     # Note: Base CSS indentation is 2-spaces, so top-level child element selectors
