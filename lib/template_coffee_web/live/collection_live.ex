@@ -40,7 +40,7 @@ defmodule TemplateCoffeeWeb.CollectionLive do
               end
 
               c &sub_component/1 do
-                p class: "red #{css_scope}" do
+                p class: "red #{css_scope} psuedo-element-parent" do
                   "slot content defined in the parent's template should be red though"
                 end
               end
@@ -90,6 +90,12 @@ defmodule TemplateCoffeeWeb.CollectionLive do
         .red {
           color: red;
         }
+      }
+
+      /* ensure that ::before/::after psuedo-elements work */
+      .psuedo-element-parent::after {
+        display: block;
+        content: "::before/::after psuedo-elements should also work";
       }
     </style>
     """)

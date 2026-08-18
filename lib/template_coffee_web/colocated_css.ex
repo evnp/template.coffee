@@ -118,8 +118,8 @@ defmodule TemplateCoffeeWeb.ColocatedScopedCSS do
     # when using CSS-scoping w/ Temple we'll apply the scoping attr/class separately.
   end
 
-  @unnested_non_atrule_selector_regex ~r/^( *)([^ \n@&{](?:[^\n&{]*[^ \n&{])?) +{/m
-  @rescope_selector_transform_pattern "&:is(\\2), & :is(\\2)"
+  @unnested_non_atrule_selector_regex ~r/^( *)([^ \n@&{](?:[^\n&{]*[^ \n&{])?)(::?before|::?after)? +{/Um
+  @rescope_selector_transform_pattern "&:is(\\2)\\3, & :is(\\2)\\3"
   # The "rescope selector transform" allows scope classes/attrs to be applied directly
   # on elements targeted by top-level classes within the scoped CSS. This is useful
   # when re-opening a scope inside a slot child component within the parent; without
