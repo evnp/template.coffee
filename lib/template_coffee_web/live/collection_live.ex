@@ -85,8 +85,11 @@ defmodule TemplateCoffeeWeb.CollectionLive do
         }
       }
 
-      .red {
-        color: red;
+      @media screen {
+        /* ensure that styles nested in media queries work */
+        .red {
+          color: red;
+        }
       }
     </style>
     """)

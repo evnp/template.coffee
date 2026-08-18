@@ -98,8 +98,6 @@ defmodule TemplateCoffeeWeb.ColocatedScopedCSS do
           raise(RuntimeError, "@select must be :class, :attr, or :both")
       end
 
-    css = transform_top_level_child_selectors_for_rescoping(css)
-
     css =
       case @compat do
         :modern ->
@@ -120,7 +118,21 @@ defmodule TemplateCoffeeWeb.ColocatedScopedCSS do
     # when using CSS-scoping w/ Temple we'll apply the scoping attr/class separately.
   end
 
+  @unnested_non_atrule_selector_regex ~r/^( *)([^ \n@&{](?:[^\n&{]*[^ \n&{])?) +{/m
+  @rescope_selector_transform_pattern "&:is(\\2), & :is(\\2)"
+  # The "rescope selector transform" allows scope classes/attrs to be applied directly
+  # on elements targeted by top-level classes within the scoped CSS. This is useful
+  # when re-opening a scope inside a slot child component within the parent; without
+  # the selector transform, this would require an extra wrapper element in the slot.
+
   defp scope_css_modern(css, upper_bound_selector, lower_bound_selector) do
+    css =
+      css
+      |> String.replace(
+        @unnested_non_atrule_selector_regex,
+        "\\1#{@rescope_selector_transform_pattern} {"
+      )
+
     "@scope (#{upper_bound_selector}) to (#{lower_bound_selector}) { #{css} }"
   end
 
@@ -133,31 +145,26 @@ defmodule TemplateCoffeeWeb.ColocatedScopedCSS do
     """
   end
 
-  @top_level_child_selector_regex ~r/^  ([^ ]|[^ ].*[^ ]) * {/m
-
   defp scope_css_legacy_compat(css, upper_bound_selector, lower_bound_selector) do
-    lower = lower_bound_selector
-
     # For top-level child element selectors in CSS, add :not(...) rules for descoping:
     css =
       css
       |> String.replace(
-        @top_level_child_selector_regex,
-        "  :is(\\1):not(#{lower}:is(\\1)):not(#{lower} :is(\\1)) {"
+        @unnested_non_atrule_selector_regex,
+        "\\1:is(#{@rescope_selector_transform_pattern})" <>
+          ":not(#{lower_bound_selector}:is(#{@rescope_selector_transform_pattern}))" <>
+          ":not(#{lower_bound_selector} :is(#{@rescope_selector_transform_pattern})) {"
       )
-
-    # Note: Base CSS indentation is 2-spaces, so top-level child element selectors
-    #       can be identified via regex above by start-of-line followed immediately
-    #       by two spaces ("^  " at start of regex). Multiline mode is needed to
-    #       match against all lines in string (/m at end of regex).
 
     # Wrap all CSS within main scoping selector:
     "#{upper_bound_selector} { #{css} }"
   end
 
-  defp transform_top_level_child_selectors_for_rescoping(css) do
-    css |> String.replace(@top_level_child_selector_regex, "  &:is(\\1), :is(\\1) {")
-  end
+  # TODO comment explain this function
+  # TODO we shouldn't transform at-rules at all, here or in scope_css_legacy_compat
+  # defp transform_unnested_non_atrule_selectors_for_rescoping(css) do
+  #   css |> String.replace(@unnested_non_atrule_selector_regex, "  &:is(\\1), :is(\\1) {")
+  # end
 
   defp hash(string) do
     # It is important that we do not pad
