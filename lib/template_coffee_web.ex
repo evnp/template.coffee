@@ -90,10 +90,14 @@ defmodule TemplateCoffeeWeb do
       # Common modules used in templates
       alias Phoenix.LiveView.JS
       alias TemplateCoffeeWeb.Layouts
+      import TemplateCoffeeWeb.Util
+
+      # Utilities for managing colocated JS and CSS:
       alias Phoenix.LiveView.ColocatedJS
       alias Phoenix.LiveView.ColocatedHook
       alias TemplateCoffeeWeb.ColocatedScopedCSS
-      import TemplateCoffeeWeb.Util
+      import TemplateCoffeeWeb.ColocatedScopedCSS.Macros
+      # ^ provides `scope_css ~H"..."` macro
 
       # Routes generation with the ~p sigil
       unquote(verified_routes())

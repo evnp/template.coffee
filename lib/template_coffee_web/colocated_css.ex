@@ -176,3 +176,41 @@ defmodule TemplateCoffeeWeb.ColocatedScopedCSS do
     |> Base.encode32(case: :lower, padding: false)
   end
 end
+
+defmodule TemplateCoffeeWeb.ColocatedScopedCSS.Macros do
+  defmacro scope_css({:sigil_H, _context, [{_, meta, styles}, _mod]}) do
+    # Formatting of `expr` is aligned precisely to match whitespace
+    # when styles are defined normally within a HEEx sigil, eg.
+    # ~H"""
+    #   ...styles here...
+    # """
+    expr = "<style :type={ColocatedScopedCSS}>#{styles}
+            </style>
+            "
+
+    quote do
+      TemplateCoffeeWeb.ColocatedScopedCSS.scope(
+        __ENV__,
+        unquote(
+          # The following is essentially the full implementation of ~H (HEEx) sigil.
+          # https://github.com/phoenixframework/phoenix_live_view/blob/main/lib/phoenix_component.ex#L923
+          Phoenix.LiveView.TagEngine.compile(expr,
+            file: __CALLER__.file,
+            line: __CALLER__.line + 1,
+            caller: __CALLER__,
+            indentation: meta[:indentation] || 0,
+            tag_handler: Phoenix.LiveView.HTMLEngine
+          )
+        )
+      )
+    end
+  end
+
+  defmacro descope_css() do
+    quote do
+      # This must be implemented as a macro instead of a standard function so that
+      # __ENV__ contains the caller's module when the line below is evaluated:
+      TemplateCoffeeWeb.ColocatedScopedCSS.descope(__ENV__)
+    end
+  end
+end

@@ -1,22 +1,22 @@
 defmodule TemplateCoffeeWeb.CollectionLive do
   use TemplateCoffeeWeb, :live_view
-  alias TemplateCoffeeWeb.Util
 
-  defp container_css(assigns) do
-    ColocatedScopedCSS.scope(__ENV__, ~H"""
-    <style :type={ColocatedScopedCSS}>
-      width: 100vw;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    </style>
-    """)
-  end
+  # Ensure scoped CSS within its own function works:
+  # (`assigns` must be passed as param; required for ~H"..." HEEX sigil to work)
+  def container_css(assigns), do: scope_css ~H"""
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  """
 
-  defp css(assigns) do
-    ColocatedScopedCSS.scope(__ENV__, ~H"""
-    <style :type={ColocatedScopedCSS}>
+  def render(assigns) do
+    container_css_scope = container_css(assigns)
+
+    # Ensure scoped CSS defined directly within render function works:
+    # (`assigns` is already in scope, which allows ~H"..." HEEX sigil to work)
+    css_scope = scope_css ~H"""
       .blue {
         color: blue;
         width: 20vw;
@@ -44,13 +44,7 @@ defmodule TemplateCoffeeWeb.CollectionLive do
         content: "(socket ID from @assigns via data attr in ::after psuedo-element: "
           attr(data-socketid) ")";
       }
-    </style>
-    """)
-  end
-
-  def render(assigns) do
-    container_css_scope = container_css(assigns)
-    css_scope = css(assigns)
+    """
 
     temple do
       c &Layouts.app/1, flash: @flash do
@@ -61,10 +55,11 @@ defmodule TemplateCoffeeWeb.CollectionLive do
         """
 
         div class: ~u"bg-sky-200 #{css_scope} #{container_css_scope}",
-            style: Util.css_vars_to_style(socket_id_via_css_var: @socket.id),
+            style: css_vars_to_style(socket_id_via_css_var: @socket.id),
             "phx-hook": temple_phx_hook(__MODULE__, "testHook"),
             id: "hooks-need-ids"
         do
+
           div do
             div class: "flex" do
               input class: "blue",
@@ -79,11 +74,11 @@ defmodule TemplateCoffeeWeb.CollectionLive do
                 p class: "red", do: "this should be red, per CSS scoping"
               end
 
-              div "data-descope": ColocatedScopedCSS.descope(__ENV__) do
+              div "data-descope": descope_css() do
                 p class: "red", do: "this should not be red, if using attr CSS scoping"
               end
 
-              div class: ColocatedScopedCSS.descope(__ENV__) do
+              div class: descope_css() do
                 p class: "red", do: "this should not be red, if using class CSS scoping"
               end
 
@@ -112,13 +107,10 @@ defmodule TemplateCoffeeWeb.CollectionLive do
   end
 
   def sub_component(assigns) do
+    # Below - Ensure scoped CSS defined inline within Temple element class works:
+    # (`assigns` is already in scope, which allows ~H"..." HEEX sigil to work)
     temple do
-      div class:
-            ~u"#{ColocatedScopedCSS.scope(__ENV__, ~H"""
-            <style :type={ColocatedScopedCSS}>
-              background: rgba(50, 50, 50, 0.1);
-            </style>
-            """)}" do
+      div class: scope_css ~H"background: rgba(50, 50, 50, 0.1);" do
         p do: "Hello, I'm a sub-component!"
 
         div class: "ml-8" do
@@ -126,7 +118,7 @@ defmodule TemplateCoffeeWeb.CollectionLive do
             "this should not be red, due to separate sub-component CSS scope"
           end
 
-          div class: ColocatedScopedCSS.descope(__ENV__) do
+          div class: descope_css() do
             slot @inner_block
           end
         end
