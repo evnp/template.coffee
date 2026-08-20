@@ -1,4 +1,42 @@
-defmodule TemplateCoffeeWeb.ColocatedGlobalCSS do
+defmodule TemplateCoffeeWeb.Colocation.Macros do
+  defmacro scope_css({:sigil_H, _context, [{_, meta, styles}, _mod]}) do
+    # Formatting of `expr` is aligned precisely to match whitespace
+    # when styles are defined normally within a HEEx sigil, eg.
+    # ~H"""
+    #   ...styles here...
+    # """
+    expr = "<style :type={ScopedCSS}>#{styles}
+            </style>
+            "
+
+    quote do
+      TemplateCoffeeWeb.Colocation.ScopedCSS.scope(
+        __ENV__,
+        unquote(
+          # The following is essentially the full implementation of ~H (HEEx) sigil.
+          # https://github.com/phoenixframework/phoenix_live_view/blob/main/lib/phoenix_component.ex#L923
+          Phoenix.LiveView.TagEngine.compile(expr,
+            file: __CALLER__.file,
+            line: __CALLER__.line + 1,
+            caller: __CALLER__,
+            indentation: meta[:indentation] || 0,
+            tag_handler: Phoenix.LiveView.HTMLEngine
+          )
+        )
+      )
+    end
+  end
+
+  defmacro descope_css() do
+    quote do
+      # This must be implemented as a macro instead of a standard function so that
+      # __ENV__ contains the caller's module when the line below is evaluated:
+      TemplateCoffeeWeb.Colocation.ScopedCSS.descope(__ENV__)
+    end
+  end
+end
+
+defmodule TemplateCoffeeWeb.Colocated.GlobalCSS do
   use Phoenix.LiveView.ColocatedCSS
 
   @impl true
@@ -9,7 +47,7 @@ end
 
 # Scoped-Colocated-CSS implementation that works with Temple, adapted from:
 # phoenix-live-view.hexdocs.pm/Phoenix.LiveView.ColocatedCSS.html#module-scoped-css
-defmodule TemplateCoffeeWeb.ColocatedScopedCSS do
+defmodule TemplateCoffeeWeb.Colocation.ScopedCSS do
   use Phoenix.LiveView.ColocatedCSS
 
   @select :class
@@ -31,9 +69,9 @@ defmodule TemplateCoffeeWeb.ColocatedScopedCSS do
     #       match the parent scope as a marker to automatically de-scope.
     # Note: Unused _style_heex param allows specifying <style> HEEx template
     #       on the same line as the CSS data-scope or class is set, eg.
-    #         data-scope={ColocatedScopedCSS.scope(__ENV__, ~H"""...""")}
+    #         data-scope={Colocation.ScopedCSS.scope(__ENV__, ~H"""...""")}
     #         OR
-    #         class="my-elm #{ColocatedScopedCSS.scope(__ENV__, ~H"""...""")}"
+    #         class="my-elm #{Colocation.ScopedCSS.scope(__ENV__, ~H"""...""")}"
     #       This helps ensure that __ENV__.line (from scoped element) and meta.line
     #       (from colocated-CSS system) will match when scope hash is computed above.
   end
@@ -174,43 +212,5 @@ defmodule TemplateCoffeeWeb.ColocatedScopedCSS do
     string
     |> then(&:crypto.hash(:md5, &1))
     |> Base.encode32(case: :lower, padding: false)
-  end
-end
-
-defmodule TemplateCoffeeWeb.ColocatedScopedCSS.Macros do
-  defmacro scope_css({:sigil_H, _context, [{_, meta, styles}, _mod]}) do
-    # Formatting of `expr` is aligned precisely to match whitespace
-    # when styles are defined normally within a HEEx sigil, eg.
-    # ~H"""
-    #   ...styles here...
-    # """
-    expr = "<style :type={ColocatedScopedCSS}>#{styles}
-            </style>
-            "
-
-    quote do
-      TemplateCoffeeWeb.ColocatedScopedCSS.scope(
-        __ENV__,
-        unquote(
-          # The following is essentially the full implementation of ~H (HEEx) sigil.
-          # https://github.com/phoenixframework/phoenix_live_view/blob/main/lib/phoenix_component.ex#L923
-          Phoenix.LiveView.TagEngine.compile(expr,
-            file: __CALLER__.file,
-            line: __CALLER__.line + 1,
-            caller: __CALLER__,
-            indentation: meta[:indentation] || 0,
-            tag_handler: Phoenix.LiveView.HTMLEngine
-          )
-        )
-      )
-    end
-  end
-
-  defmacro descope_css() do
-    quote do
-      # This must be implemented as a macro instead of a standard function so that
-      # __ENV__ contains the caller's module when the line below is evaluated:
-      TemplateCoffeeWeb.ColocatedScopedCSS.descope(__ENV__)
-    end
   end
 end
