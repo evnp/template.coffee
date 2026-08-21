@@ -3,7 +3,7 @@ defmodule TemplateCoffeeWeb.CollectionLive do
 
   # Ensure scoped CSS within its own function works:
   # (`assigns` must be passed as param; required for ~H"..." HEEX sigil to work)
-  def container_css(assigns), do: scope_css ~H"""
+  def container_css(), do: scope_css ~H"""
     width: 100vw;
     height: 100vh;
     display: flex;
@@ -12,7 +12,7 @@ defmodule TemplateCoffeeWeb.CollectionLive do
   """
 
   def render(assigns) do
-    container_css_scope = container_css(assigns)
+    container_css_scope = container_css()
 
     # Ensure scoped CSS defined directly within render function works:
     # (`assigns` is already in scope, which allows ~H"..." HEEX sigil to work)
@@ -46,21 +46,27 @@ defmodule TemplateCoffeeWeb.CollectionLive do
       }
     """
 
+    test_hook = colocate_hook ~H"""
+      export default {
+        mounted() {
+          alert("hello from colocated hook");
+        },
+      };
+    """
+
     temple do
       c &Layouts.app/1, flash: @flash do
-        ~H"""
-        <script :type={ColocatedJS}>
-          alert("hello from colocated js");
-        </script>
-        """
+        colocate_js ~H"alert('hello from colocated js')"
 
         div class: ~u"bg-sky-200 #{css_scope} #{container_css_scope}",
             style: css_vars_to_style(socket_id_via_css_var: @socket.id),
-            "phx-hook": temple_phx_hook(__MODULE__, "testHook"),
+            "phx-hook": test_hook,
             id: "hooks-need-ids"
         do
 
-          div do
+          div "phx-hook": (colocate_hook ~H"export default { mounted() { alert('hello from inlined hook') } }"),
+              id: "inlined-hooks-also-need-ids"
+          do
             div class: "flex" do
               input class: "blue",
                     value: "Welcome to the blue collection.",
@@ -91,16 +97,6 @@ defmodule TemplateCoffeeWeb.CollectionLive do
               end
             end
           end
-
-          ~H"""
-          <script :type={ColocatedHook} name=".testHook">
-            export default {
-              mounted() {
-                alert("hello from colocated hook");
-              },
-            };
-          </script>
-          """
         end
       end
     end

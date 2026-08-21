@@ -7,7 +7,7 @@ defmodule TemplateCoffeeWeb.Util do
   See: https://github.com/mhanberg/temple/issues/287#issuecomment-4972055158
   """
   def temple_phx_hook(module, hook) do
-    "#{String.replace_prefix("#{module}", "Elixir.", "")}.#{hook}"
+    "#{module |> to_string() |> String.replace_prefix("Elixir.", "")}.#{hook}"
   end
 
   def css_props_to_style(css_prop_keyword_list) do
