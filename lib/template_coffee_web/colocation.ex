@@ -1,8 +1,16 @@
 defmodule TemplateCoffeeWeb.Colocation.Macros do
-  defmacro scope_css({:sigil_H, _context, [{_, meta, styles}, _mod]}) do
-    # Formatting of style is aligned precisely to match whitespace
+  defmacro scope_css({:sigil_H, _context, [{_, meta, [styles]}, _mod]}) do
+    styles =
+      styles
+      |> String.trim()
+      |> validate_surrounding_tags("style", "CSS", "scope_css")
+      |> String.trim_leading("<style>")
+      |> String.trim_trailing("</style>")
+      |> String.trim()
+
+    # Formatting of `expr` is aligned precisely to match whitespace
     # when styles are defined normally within a HEEx sigil:
-    expr = "<style :type={ScopedCSS}>#{styles}
+    expr = "<style :type={ScopedCSS}>  #{styles}
             </style>
             "
 
@@ -21,22 +29,38 @@ defmodule TemplateCoffeeWeb.Colocation.Macros do
     end
   end
 
-  defmacro colocate_js({:sigil_H, _context, [{_, meta, script}, _mod]}) do
+  defmacro colocate_js({:sigil_H, _context, [{_, meta, [script]}, _mod]}) do
+    script =
+      script
+      |> String.trim()
+      |> validate_surrounding_tags("script", "JS", "colocate_js")
+      |> String.trim_leading("<script>")
+      |> String.trim_trailing("</script>")
+      |> String.trim()
+
     # Formatting of `expr` is aligned precisely to match whitespace
     # when scripts are defined normally within a HEEx sigil:
-    expr = "<script :type={ColocatedJS}>#{script}
+    expr = "<script :type={ColocatedJS}>  #{script}
            </script>
            "
 
     compile_heex(expr, meta, __CALLER__)
   end
 
-  defmacro colocate_hook({:sigil_H, _context, [{_, meta, script}, _mod]}) do
+  defmacro colocate_hook({:sigil_H, _context, [{_, meta, [script]}, _mod]}) do
     name = "hook-#{hash("#{__CALLER__.module}-#{__CALLER__.line}")}"
+
+    script =
+      script
+      |> String.trim()
+      |> validate_surrounding_tags("script", "JS", "colocate_hook")
+      |> String.trim_leading("<script>")
+      |> String.trim_trailing("</script>")
+      |> String.trim()
 
     # Formatting of `expr` is aligned precisely to match whitespace
     # when scripts are defined normally within a HEEx sigil:
-    expr = "<script :type={ColocatedHook} name=\".#{name}\">#{script}
+    expr = "<script :type={ColocatedHook} name=\".#{name}\">  #{script}
            </script>
            "
 
@@ -44,6 +68,20 @@ defmodule TemplateCoffeeWeb.Colocation.Macros do
 
     quote do
       "#{__MODULE__ |> to_string() |> String.replace_prefix("Elixir.", "")}.#{unquote(name)}"
+    end
+  end
+
+  defp validate_surrounding_tags("" <> str, "" <> expected_tag_name, "" <> type, "" <> macro) do
+    if String.starts_with?(str, "<#{expected_tag_name}>") and
+         String.ends_with?(str, "</#{expected_tag_name}>") do
+      str
+    else
+      raise(
+        ArgumentError,
+        "Colocated #{type} passed to #{macro} should be surrounded in" <>
+          " <#{expected_tag_name}>...</#{expected_tag_name}> tags (with no attrs)" <>
+          " to ensure code formatting works."
+      )
     end
   end
 
