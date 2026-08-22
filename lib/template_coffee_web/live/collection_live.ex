@@ -5,14 +5,12 @@ defmodule TemplateCoffeeWeb.CollectionLive do
   # (`assigns` must be passed as param; required for ~H"..." HEEX sigil to work)
   def container_css() do
     scope_css(~H"""
-    <style>
       width: 100vw;
       height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-    </style>
-    """)
+    """css)
   end
 
   def render(assigns) do
@@ -22,7 +20,6 @@ defmodule TemplateCoffeeWeb.CollectionLive do
     # (`assigns` is already in scope, which allows ~H"..." HEEX sigil to work)
     css_scope =
       scope_css(~H"""
-      <style>
         .blue {
           color: blue;
           width: 20vw;
@@ -50,27 +47,22 @@ defmodule TemplateCoffeeWeb.CollectionLive do
           content: "(socket ID from @assigns via data attr in ::after psuedo-element: "
             attr(data-socketid) ")";
         }
-      </style>
-      """)
+      """css)
 
     test_hook =
       colocate_hook(~H"""
-      <script>
         export default {
           mounted() {
             alert("hello from colocated hook");
           },
         };
-      </script>
-      """)
+      """js)
 
     temple do
       c &Layouts.app/1, flash: @flash do
         colocate_js(~H"""
-        <script>
           alert("hello from colocated js");
-        </script>
-        """)
+        """js)
 
         div class: ~u"bg-sky-200 #{css_scope} #{container_css_scope}",
             style: css_vars_to_style(socket_id_via_css_var: @socket.id),
@@ -79,14 +71,12 @@ defmodule TemplateCoffeeWeb.CollectionLive do
         do
           div "phx-hook":
                 colocate_hook(~H"""
-                <script>
                   export default {
                     mounted() {
                       alert("hello from inlined hook");
                     },
                   };
-                </script>
-                """),
+                """js),
               id: "inlined-hooks-also-need-ids"
           do
             div class: "flex" do
@@ -130,10 +120,8 @@ defmodule TemplateCoffeeWeb.CollectionLive do
     temple do
       div class:
             scope_css(~H"""
-            <style>
               background: rgba(50, 50, 50, 0.1);
-            </style>
-            """)
+            """css)
       do
         p do: "Hello, I'm a sub-component!"
 
