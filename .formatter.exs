@@ -23,6 +23,60 @@ defmodule ElixirFormatter do
   end
 end
 
+defmodule PreHTMLFormatColocatedSigilFormatter do
+  @behaviour Mix.Tasks.Format
+
+  def features(_opts) do
+    [sigils: [:H], extensions: []]
+  end
+
+  def format(contents, opts) do
+    cond do
+      opts[:modifiers] == ~c'css' and
+          not (contents |> String.trim() |> String.starts_with?("<style")) ->
+        "<style>#{contents}</style>"
+
+      opts[:modifiers] == ~c'js' and
+          not (contents |> String.trim() |> String.starts_with?("<script")) ->
+        "<script>#{contents}</script>"
+
+      true ->
+        contents
+    end
+  end
+end
+
+defmodule PostHTMLFormatColocatedSigilFormatter do
+  @behaviour Mix.Tasks.Format
+
+  def features(_opts) do
+    [sigils: [:H], extensions: []]
+  end
+
+  def format(contents, opts) do
+    cond do
+      opts[:modifiers] == ~c'css' and
+          contents |> String.trim() |> String.starts_with?("<style>") ->
+        contents
+        |> String.trim()
+        |> String.trim_leading("<style>")
+        |> String.trim_trailing("</style>")
+        |> String.trim_leading("\n")
+
+      opts[:modifiers] == ~c'js' and
+          contents |> String.trim() |> String.starts_with?("<script>") ->
+        contents
+        |> String.trim()
+        |> String.trim_leading("<script>")
+        |> String.trim_trailing("</script>")
+        |> String.trim_leading("\n")
+
+      true ->
+        contents
+    end
+  end
+end
+
 defmodule ColocatedCodeFormatter do
   # Reference Examples:
   # phoenix-live-view.hexdocs.pm/Phoenix.LiveView.HTMLFormatter.TagFormatter.html
@@ -73,7 +127,13 @@ end
 [
   import_deps: [:ecto, :ecto_sql, :phoenix, :temple],
   subdirectories: ["priv/*/migrations"],
-  plugins: [Phoenix.LiveView.HTMLFormatter, ElixirFormatter, RegexFormatter],
+  plugins: [
+    ElixirFormatter,
+    PreHTMLFormatColocatedSigilFormatter,
+    Phoenix.LiveView.HTMLFormatter,
+    PostHTMLFormatColocatedSigilFormatter,
+    RegexFormatter,
+  ],
   inputs: [
     "*.{heex,ex,exs}",
     "{config,lib,test}/**/*.{heex,ex,exs}",

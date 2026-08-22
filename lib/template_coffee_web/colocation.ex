@@ -72,8 +72,9 @@ defmodule TemplateCoffeeWeb.Colocation.Macros do
   end
 
   defp validate_surrounding_tags("" <> str, "" <> expected_tag_name, "" <> type, "" <> macro) do
-    if String.starts_with?(str, "<#{expected_tag_name}>") and
-         String.ends_with?(str, "</#{expected_tag_name}>") do
+    if (String.starts_with?(str, "<#{expected_tag_name}>") and
+          String.ends_with?(str, "</#{expected_tag_name}>")) or
+         not String.starts_with?(str, "<") do
       str
     else
       raise(
