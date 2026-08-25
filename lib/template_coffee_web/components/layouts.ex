@@ -34,6 +34,14 @@ defmodule TemplateCoffeeWeb.Layouts do
   slot :inner_block, required: true
 
   def app(assigns) do
+    colocate_js(~H"""
+      alert("hello from colocated js on static page");
+    """js)
+
+    #
+    # ^ Proof that colocated JS works in non-live views.
+    # (open http://localhost:4000/static to see this text)
+
     ~H"""
     <%!--<header class="navbar px-4 sm:px-6 lg:px-8">
       <div class="flex-1">
