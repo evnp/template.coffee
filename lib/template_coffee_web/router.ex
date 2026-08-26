@@ -17,7 +17,9 @@ defmodule TemplateCoffeeWeb.Router do
   scope "/", TemplateCoffeeWeb do
     pipe_through :browser
 
-    live "/", CollectionLive, :home
+    live "/", CollectionLive, :live_view
+    live "/live", CollectionLive, :live_view
+    get "/static", PageController, :static_view
   end
 
   # Other scopes may use custom stacks.
