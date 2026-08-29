@@ -96,21 +96,9 @@ defmodule TemplateCoffee.MixProject do
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "assets.setup": ["esbuild.install --if-missing"],
-      "assets.build": ["compile", &postcss/1, "esbuild template_coffee"],
-      "assets.deploy": [
-        "tailwind template_coffee --minify",
-        "esbuild template_coffee --minify",
-        "phx.digest",
-      ],
+      "assets.build": ["compile", &Coloco.PostCSS.build/1, "esbuild template_coffee"],
+      "assets.deploy": ["esbuild template_coffee --minify", "phx.digest"],
       precommit: ["compile --warnings-as-errors", "deps.unlock --unused", "format", "test"]
     ]
-  end
-
-  defp postcss(_) do
-    System.shell(
-      "node node_modules/.bin/postcss --config postcss.config.cjs css/app.css --output ../priv/static/assets/css/app.css",
-      cd: "assets",
-      env: [{"NODE_PATH", Mix.Project.build_path()}]
-    )
   end
 end
