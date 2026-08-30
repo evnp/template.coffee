@@ -8,6 +8,7 @@ const path = require("path")
 module.exports = {
   plugins: [
     require("postcss-import")({ path: process.env.NODE_PATH.split(path.delimiter) }),
+    // postcss-import should come first (per plugin docs)
     require("@tailwindcss/postcss"),
     require("postcss-nesting"),
     require("autoprefixer"),

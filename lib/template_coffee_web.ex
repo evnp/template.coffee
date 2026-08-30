@@ -94,7 +94,7 @@ defmodule TemplateCoffeeWeb do
 
       # Macros for managing colocated JS and CSS:
       # (provides scope_css, descope_css, colocate_js, colocate_hook macros)
-      import Coloco.Macros
+      import Coloco
 
       # Routes generation with the ~p sigil
       unquote(verified_routes())
