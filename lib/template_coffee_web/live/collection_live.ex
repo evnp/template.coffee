@@ -50,12 +50,8 @@ defmodule TemplateCoffeeWeb.CollectionLive do
       """css)
 
     test_hook =
-      colocate_hook(~H"""
-        export default {
-          mounted() {
-            alert("hello from colocated hook");
-          },
-        };
+      colocate_mounted_hook(~H"""
+        alert("hello from colocated hook");
       """js)
 
     temple do
