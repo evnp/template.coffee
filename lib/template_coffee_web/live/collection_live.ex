@@ -54,11 +54,26 @@ defmodule TemplateCoffeeWeb.CollectionLive do
         alert("hello from colocated hook");
       """js)
 
+    global_css(~H"""
+      /* test global CSS outside of template */
+      * {
+        font-family: Helvetica;
+      }
+    """css)
+
     temple do
       c &Layouts.app/1, flash: @flash do
         colocate_js(~H"""
           alert("hello from colocated js");
         """js)
+
+        global_css(~H"""
+          /* test global CSS inside of template */
+          * {
+            font-size: 20px;
+            letter-spacing: 0.2rem;
+          }
+        """css)
 
         div class: ~u"bg-sky-200 #{css_scope} #{container_css_scope}",
             style: css_vars_to_style(socket_id_via_css_var: @socket.id),
