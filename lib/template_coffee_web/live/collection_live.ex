@@ -71,7 +71,7 @@ defmodule TemplateCoffeeWeb.CollectionLive do
           /* test global CSS inside of template */
           * {
             font-size: 20px;
-            letter-spacing: 0.2rem;
+            letter-spacing: 0.03rem;
           }
         """css)
 
